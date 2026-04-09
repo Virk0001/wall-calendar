@@ -45,9 +45,29 @@ export default function WallCalendar() {
   }, []);
 
   /* ── Persist whenever relevant state changes ─────────── */
+  const [isLoaded, setIsLoaded] = useState(false);
+
+  // Load data
   useEffect(() => {
+    const data = loadStorage();
+    if (data.notes) setNotes(data.notes);
+    if (data.rangeStart) {
+      setRangeStart(data.rangeStart);
+      setClickPhase(data.rangeEnd ? 2 : 1);
+    }
+    if (data.rangeEnd) setRangeEnd(data.rangeEnd);
+    if (data.year != null) setYear(data.year);
+    if (data.month != null) setMonth(data.month);
+
+    setIsLoaded(true); // ✅ important
+  }, []);
+
+  // Save ONLY after loading is done
+  useEffect(() => {
+    if (!isLoaded) return;
+
     saveStorage({ notes, rangeStart, rangeEnd, year, month });
-  }, [notes, rangeStart, rangeEnd, year, month]);
+  }, [notes, rangeStart, rangeEnd, year, month, isLoaded]);
 
   /* ── Month navigation ─────────────────────────────────── */
   const navigate = useCallback((dir) => {
